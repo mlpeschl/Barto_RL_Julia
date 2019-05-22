@@ -9,21 +9,21 @@ function sargmax(array)
 end
 
 function eps_greedy(arr,eps = 0.01)
-    if rand() > 1-eps
+    if rand() < 1-eps
         return sargmax(arr)
     else
         return rand(1:9)
     end
 end
 
-γ = 0.8 #Discount Factor
-α = 10^(-4) #Learning Rate
+γ = 0.95 #Discount Factor
+α = 10^(-2) #Learning Rate
 
 r = RaceTrack(Track,noise = 0.1)
 Q = rand(r.nrow, r.ncol, r.max_velocity+1, r.max_velocity+1, 9)
 
 
-nits = 10^3
+nits = 10^4
 
 @progress for i in 1:nits
     isDone = false
@@ -51,7 +51,7 @@ end
 r = RaceTrack(Track,noise = 0)
 lengths = []
 global len = 0
-trials = 1000
+trials = 10
 for i in 1:trials
     isDone = false
     while !isDone
@@ -64,6 +64,5 @@ for i in 1:trials
 end
 
 println(len/trials)
-
 
 Q[5,3,1,1,:]
