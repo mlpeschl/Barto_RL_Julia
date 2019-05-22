@@ -64,5 +64,3 @@ for i in 1:trials
 end
 
 println(len/trials)
-
-test
