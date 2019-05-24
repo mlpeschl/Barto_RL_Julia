@@ -12,9 +12,9 @@ end
 
 
 #Off policy MC Control for estimating π ≈ π*
-gamma = 0.8  #Discount Factor
+gamma = 0.95  #Discount Factor
 
-r = RaceTrack(Track,noise = 0.1)
+r = RaceTrack(Track,noise = 0)
 Q = rand(r.nrow, r.ncol, r.max_velocity+1, r.max_velocity+1, 9)
 C = zeros(r.nrow, r.ncol, r.max_velocity+1, r.max_velocity+1, 9)
 
@@ -32,8 +32,8 @@ global b = generate_behavior(r)
 
 global upcount = 0
 global percentage = 0
-nits = 10^2
-
+nits = 10^4
+global lengthsMC = []
 
 @progress for episode in 1:nits
 
@@ -47,7 +47,7 @@ nits = 10^2
     end
 
     (S,A,R) = generate_episode(b,r)
-
+    push!(lengthsMC, length(S))
 
     G = 0
     W = 1
@@ -76,4 +76,27 @@ nits = 10^2
 end
 
 r = RaceTrack(Track,noise = 0)
-println("\nLÄNGE $(length(generate_episode(policy,r,true)))")
+#println("\nLÄNGE $(length(generate_episode(policy,r,true)))")
+
+generate_episode(policy,r, true)
+
+
+function length_eval(policy,eps)
+    isDone = false
+    locallen = 0
+
+    while !isDone
+        #println(r.position)
+        push!(S, [r.position[1],r.position[2],r.velocity[1]+1,r.velocity[2]+1])
+
+        if rand() > eps
+            action = (policy(r.position[1],r.position[2],
+                r.velocity[1]+1,r.velocity[2]+1])
+        else
+            action = rand(1:9)
+        end
+        (reward,isDone) = take_action(r,action)
+
+    end
+    return (S,A,R)
+end
