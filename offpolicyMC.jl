@@ -1,5 +1,23 @@
 include("RaceEnvironment.jl")
 
+function length_eval(policy,eps)
+    local r1 = RaceTrack(Track,noise = 0.1)
+    isDone = false
+    locallen = 0
+
+    while !isDone
+        if rand() > eps
+            action = policy[r.position[1],r.position[2],
+                r.velocity[1]+1,r.velocity[2]+1]
+        else
+            action = rand(1:9)
+        end
+        (reward,isDone) = take_action(r,action)
+        locallen += 1
+    end
+    return locallen
+end
+
 
 function generate_behavior(r::RaceTrack)
     b = Array{Any}(undef,r.nrow, r.ncol, r.max_velocity+1, r.max_velocity+1)
@@ -12,11 +30,11 @@ end
 
 
 #Off policy MC Control for estimating π ≈ π*
-gamma = 0.95  #Discount Factor
+gamma = 1  #Discount Factor
 
-r = RaceTrack(Track,noise = 0)
+r = RaceTrack(Track,noise = 0.1)
 Q = rand(r.nrow, r.ncol, r.max_velocity+1, r.max_velocity+1, 9)
-C = zeros(r.nrow, r.ncol, r.max_velocity+1, r.max_velocity+1, 9)
+C = rand(r.nrow, r.ncol, r.max_velocity+1, r.max_velocity+1, 9)
 
 policy = zeros(Int64,r.nrow, r.ncol, r.max_velocity+1, r.max_velocity+1)
 
@@ -25,11 +43,7 @@ for i in 1:r.nrow, j in 1:r.ncol, k in 1:r.max_velocity+1, l in 1:r.max_velocity
 end
 
 #Learning see below
-policy2 = copy(policy);
 global b = generate_behavior(r)
-
-
-
 global upcount = 0
 global percentage = 0
 nits = 10^4
@@ -47,7 +61,6 @@ global lengthsMC = []
     end
 
     (S,A,R) = generate_episode(b,r)
-    push!(lengthsMC, length(S))
 
     G = 0
     W = 1
@@ -73,30 +86,13 @@ global lengthsMC = []
         #println(W)
         #W = W*2
     end
+    push!(lengthsMC, copy(length_eval(policy,0.1)))
 end
 
-r = RaceTrack(Track,noise = 0)
-#println("\nLÄNGE $(length(generate_episode(policy,r,true)))")
 
-generate_episode(policy,r, true)
-
-
-function length_eval(policy,eps)
-    isDone = false
-    locallen = 0
-
-    while !isDone
-        #println(r.position)
-        push!(S, [r.position[1],r.position[2],r.velocity[1]+1,r.velocity[2]+1])
-
-        if rand() > eps
-            action = (policy(r.position[1],r.position[2],
-                r.velocity[1]+1,r.velocity[2]+1])
-        else
-            action = rand(1:9)
-        end
-        (reward,isDone) = take_action(r,action)
-
-    end
-    return (S,A,R)
+"test = []
+for i in 1:10^3
+    push!(test, copy(length_eval(policy,1.0)))
 end
+
+test"
