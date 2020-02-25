@@ -1,3 +1,6 @@
+#Step size experiment on the simple GridWorld Example
+
+
 include("Environment.jl")
 
 function sargmax(array::Vector{Float64})

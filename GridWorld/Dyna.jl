@@ -1,4 +1,8 @@
+#Comparison of various Dyna Planning Architectures on the Learning Performance in a simple GridWorld Experiment
+
+
 include("Environment.jl")
+
 
 function eps_greedy(Q::Array{Float64,2}, epsilon::Float64, S::Int64)
     randnr = rand()
